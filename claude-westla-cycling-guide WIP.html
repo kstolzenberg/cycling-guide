@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Friendly Guide to Cycling in West LA</title>
+<link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Roboto+Condensed:wght@100;300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root {
+    --sage:  #8aac8a;
+    --moss:  #5a7a5a;
+    --sand:  #d4b896;
+    --gold:  #c9a84c;
+    --brown: #7a5c3a;
+    --cream: #f5f0e8;
+    --ink:   #2c2416;
+    --mist:  rgba(245,240,232,0.95);
+    --shop-color: #6b9eb4;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html, body {
+    width:100%; height:100%;
+    overflow:hidden;
+    font-family:'Roboto Condensed', sans-serif;
+    font-weight:100;
+    background:var(--cream);
+    color:var(--ink);
+  }
+
+  #map {
+    position:fixed;
+    inset:0;
+    z-index:1;
+  }
+
+  /* Watercolor warmth — darker + more contrast so ocean reads bluer than land */
+  .leaflet-tile-pane {
+    filter: saturate(0.75) sepia(0.18) brightness(0.88) contrast(1.05) hue-rotate(-8deg);
+  }
+
+  /* ── Header ── */
+  #header {
+    position:fixed;
+    top:0; left:0; right:0;
+    z-index:800;
+    padding:16px 28px 22px;
+    background:linear-gradient(to bottom, rgba(245,240,232,0.97) 60%, rgba(245,240,232,0));
+    pointer-events:none;
+  }
+  #header h1 {
+    font-family:'Amatic SC', cursive;
+    font-weight:700;
+    font-size:3.125rem;
+    color:var(--brown);
+    letter-spacing:0.04em;
+    line-height:1;
+  }
+  #header p {
+    font-size:0.9rem;
+    color:var(--moss);
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    margin-top:3px;
+    font-weight:300;
+  }
+
+  /* ── Legend ── */
+  #legend {
+    position:fixed;
+    bottom:24px; left:24px;
+    z-index:800;
+    background:var(--mist);
+    border:1px solid rgba(122,92,58,0.18);
+    border-radius:12px;
+    padding:13px 16px 14px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 4px 20px rgba(44,36,22,0.1);
+  }
+  #legend h3 {
+    font-family:'Amatic SC', cursive;
+    font-weight:700;
+    font-size:1.31rem;
+    color:var(--brown);
+    margin-bottom:8px;
+    letter-spacing:0.05em;
+  }
+  .legend-item {
+    display:flex; align-items:center; gap:8px;
+    margin-bottom:5px;
+    font-size:0.9rem;
+    font-weight:300;
+    color:var(--ink);
+    letter-spacing:0.06em;
+  }
+  .l-dot {
+    width:12px; height:12px; border-radius:50%; flex-shrink:0;
+    background:var(--shop-color);
+    border:2px solid white;
+    box-shadow:0 1px 4px rgba(107,158,180,0.4);
+  }
+  .l-star { font-size:13px; line-height:1; flex-shrink:0; }
+  .l-circle {
+    width:14px; height:14px; border-radius:50%; flex-shrink:0;
+    border:2px dashed var(--sage);
+    background:radial-gradient(circle, rgba(138,172,138,0.35), transparent);
+  }
+
+  /* ── Info overlay card ── */
+  #overlay-card {
+    position:fixed;
+    z-index:1200;
+    background:var(--mist);
+    border:1px solid rgba(122,92,58,0.2);
+    border-radius:14px;
+    padding:20px 24px 18px;
+    max-width:320px;
+    min-width:250px;
+    box-shadow:0 8px 36px rgba(44,36,22,0.15);
+    backdrop-filter:blur(14px);
+    display:none;
+    pointer-events:all;
+  }
+  #overlay-card.visible {
+    display:block;
+    animation:fadeUp 0.16s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(7px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  #overlay-card .oc-tag {
+    display:block;
+    font-size:0.775rem;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:400;
+    margin-bottom:6px;
+  }
+  #overlay-card h2 {
+    font-family:'Amatic SC', cursive;
+    font-weight:700;
+    font-size:1.81rem;
+    color:var(--brown);
+    margin-bottom:7px;
+    line-height:1.1;
+  }
+  #overlay-card p {
+    font-size:0.975rem;
+    line-height:1.55;
+    color:var(--ink);
+    font-weight:300;
+    margin-bottom:10px;
+  }
+  #overlay-card a {
+    font-size:0.875rem;
+    color:var(--moss);
+    text-decoration:none;
+    letter-spacing:0.07em;
+    border-bottom:1px solid var(--sage);
+    padding-bottom:1px;
+    transition:color 0.15s;
+  }
+  #overlay-card a:hover { color:var(--brown); }
+  #overlay-close {
+    position:absolute;
+    top:10px; right:12px;
+    font-size:1.19rem;
+    color:var(--sand);
+    cursor:pointer;
+    background:none; border:none;
+    line-height:1;
+    transition:color 0.15s;
+  }
+  #overlay-close:hover { color:var(--brown); }
+
+  /* marker hovers */
+  .shop-dot {
+    width:15px; height:15px;
+    background:var(--shop-color);
+    border:2.5px solid white;
+    border-radius:50%;
+    box-shadow:0 2px 8px rgba(107,158,180,0.5);
+    cursor:pointer;
+    transition:transform 0.15s;
+  }
+  .shop-dot:hover { transform:scale(1.35); }
+
+  .star-icon {
+    width:22px; height:22px;
+    cursor:pointer;
+    filter:drop-shadow(0 2px 4px rgba(201,168,76,0.55));
+    transition:transform 0.15s;
+    display:block;
+  }
+  .star-icon:hover { transform:scale(1.3); }
+
+  .leaflet-control-attribution {
+    font-size:9px !important;
+    background:rgba(245,240,232,0.75) !important;
+  }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="header">
+  <h1>Friendly Guide to Cycling in West LA</h1>
+  <p>Shops · Group Rides · Destinations</p>
+</div>
+
+<div id="legend">
+  <h3>Map Key</h3>
+  <div class="legend-item"><div class="l-dot"></div>Bike Shop</div>
+  <div class="legend-item"><span class="l-star">⭐</span>Group Ride</div>
+  <div class="legend-item"><div class="l-circle"></div>Ride Destination</div>
+</div>
+
+<!-- Single shared overlay card — lives outside the map so clicks inside work cleanly -->
+<div id="overlay-card">
+  <button id="overlay-close">✕</button>
+  <span class="oc-tag" id="oc-tag"></span>
+  <h2 id="oc-title"></h2>
+  <p id="oc-body"></p>
+  <span id="oc-link"></span>
+</div>
+
+<script>
+// ─── Map ───────────────────────────────────────────────────────
+const map = L.map('map', {
+  center: [34.022, -118.455],
+  zoom: 12,
+  minZoom: 10,
+  maxZoom: 16,
+  zoomControl: false,
+});
+
+// CartoDB Voyager — no referrer restrictions, works from file://
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 19,
+  crossOrigin: true,
+}).addTo(map);
+
+// ─── Overlay card ─────────────────────────────────────────────
+const card    = document.getElementById('overlay-card');
+const ocTag   = document.getElementById('oc-tag');
+const ocTitle = document.getElementById('oc-title');
+const ocBody  = document.getElementById('oc-body');
+const ocLink  = document.getElementById('oc-link');
+const ocClose = document.getElementById('overlay-close');
+
+let cardVisible  = false;
+let suppressNext = false; // true for one frame after opening, to block the "same-click" close
+
+function showCard(screenX, screenY, tag, title, body, href, linkLabel) {
+  ocTag.textContent   = tag    || '';
+  ocTitle.textContent = title  || '';
+  ocBody.textContent  = body   || '';
+  ocLink.innerHTML    = href
+    ? `<a href="${href}" target="_blank" rel="noopener">↗ ${linkLabel}</a>`
+    : '';
+
+  card.style.left = (screenX + 16) + 'px';
+  card.style.top  = (screenY - 10) + 'px';
+
+  // Re-trigger animation
+  card.classList.remove('visible');
+  void card.offsetWidth;
+  card.classList.add('visible');
+  cardVisible  = true;
+  suppressNext = true;
+
+  // Clamp after paint
+  requestAnimationFrame(() => {
+    const r = card.getBoundingClientRect();
+    let left = screenX + 16;
+    let top  = screenY - 10;
+    if (left + r.width  > window.innerWidth  - 12) left = screenX - r.width - 16;
+    if (top  + r.height > window.innerHeight - 12) top  = screenY - r.height;
+    card.style.left = left + 'px';
+    card.style.top  = top  + 'px';
+    // Allow outside-clicks to close only after this frame
+    requestAnimationFrame(() => { suppressNext = false; });
+  });
+}
+
+function hideCard() {
+  card.classList.remove('visible');
+  cardVisible = false;
+}
+
+ocClose.addEventListener('click', (e) => {
+  e.stopPropagation();
+  hideCard();
+});
+
+// Clicks outside the card close it
+document.addEventListener('click', (e) => {
+  if (suppressNext) return;
+  if (!cardVisible)  return;
+  if (!card.contains(e.target)) hideCard();
+});
+
+// ─── Data ─────────────────────────────────────────────────────
+const shops = [
+  {
+    // 114 Washington Blvd — one block from Venice Pier, next to Grand Canal
+    name: "West LA Bicycles",
+    latlng: [33.9927, -118.4705],
+    desc: "A beloved neighborhood institution with expert mechanics, a curated selection of city and road bikes, and a crew who genuinely ride.",
+    url: "https://www.westlabicycles.com", urlLabel: "westlabicycles.com"
+  },
+  {
+    // 1930 Lincoln Blvd, Santa Monica
+    name: "Luft Cycle",
+    latlng: [34.0190, -118.4715],
+    desc: "Venice's sleekest bike boutique. Performance road and gravel bikes with a design-forward selection of components and accessories.",
+    url: "https://www.luftcycle.com", urlLabel: "luftcycle.com"
+  },
+  {
+    // 12255 Venice Blvd, Mar Vista — between Grandview Blvd and Centinela Ave
+    name: "Bikerowave Co-op",
+    latlng: [34.0022, -118.4278],
+    desc: "A community-run DIY repair co-op. Pay-what-you-can tools, learn from volunteers. Radically democratic cycling infrastructure.",
+    url: "https://bikerowave.org", urlLabel: "bikerowave.org"
+  },
+  {
+    name: "Bike Center Santa Monica",
+    latlng: [34.0133, -118.4912],
+    desc: "Full-service shop right by the beach path. Rentals, repairs, and group ride departures — the hub of Santa Monica cycling.",
+    url: "https://thebikecenter.com", urlLabel: "thebikecenter.com"
+  },
+];
+
+const rides = [
+  {
+    // Windward Plaza, Venice
+    name: "Venice Pedal Club",
+    latlng: [33.9880, -118.4721], when: "Tuesday · 6pm",
+    desc: "A lively weekly social roll through Venice streets and the beachfront path. All paces welcome, great energy every time.",
+    url: "https://www.instagram.com/venicepedalmash", urlLabel: "@venicepedalmash on Instagram"
+  },
+  {
+    // 114 Washington Blvd — departs from West LA Bicycles
+    name: "West LA Bicycle Ride",
+    latlng: [33.9927, -118.4705], when: "Thursday · 7pm",
+    desc: "Weekly group ride departing from West LA Bicycles on Washington Blvd. Social pace, mixed terrain, rotating routes — a true neighborhood staple.",
+    url: "https://www.instagram.com/westlabicycles", urlLabel: "@westlabicycles on Instagram"
+  },
+  {
+    // 12325 Venice Blvd, Mar Vista — just east of Bikerowave
+    name: "Mixed Race Ride",
+    latlng: [34.0022, -118.4267], when: "Thursday · 8pm",
+    desc: "A community-centered ride celebrating diversity in cycling. High energy, inclusive, and rooted in LA street culture.",
+    url: "https://www.instagram.com/themixedrace_ride", urlLabel: "@themixedrace_ride on Instagram"
+  },
+  {
+    // Windward Plaza, Venice
+    name: "Venice Electric Light Parade",
+    latlng: [33.9878, -118.4718], when: "Sunday · 6pm",
+    desc: "Light up your bike and join the parade. A glowing, festive weekly roll departing from Windward Plaza at dusk.",
+    url: "https://www.instagram.com/veniceelectriclightparade", urlLabel: "@veniceelectriclightparade on Instagram"
+  },
+  {
+    name: "Adult Learn to Ride",
+    latlng: [34.0125, -118.4930], when: "Sunday · 9am",
+    desc: "Patient, friendly instruction for adults learning to ride. Run by Bike Center Santa Monica right on the beach path.",
+    url: "https://thebikecenter.com/classes", urlLabel: "thebikecenter.com/classes"
+  },
+];
+
+const destinations = [
+  { name:"Will Rogers / Inspiration Point", latlng:[34.0451,-118.5282], radius:1100, tag:"Gravel · Vista",
+    desc:"A gentle climb up double-track gravel to a ridgeline with sweeping Pacific Ocean views. Best ridden at golden hour." },
+  { name:"Dockweiler Beach", latlng:[33.9219,-118.4274], radius:1200, tag:"Beach Path · Bonfire",
+    desc:"Follow the beach path south to fire pits at the water's edge. Jet planes, bonfires, and salt air — classic LA." },
+  { name:"Sullivan Ridge", latlng:[34.0720,-118.5070], radius:1300, tag:"Gravel · Mountains",
+    desc:"Double-track gravel threading into the Santa Monica Mountains. Quiet and shaded — surprisingly wild for the city." },
+  { name:"LMU Bird Trail", latlng:[33.9686,-118.4168], radius:800, tag:"Singletrack · Urban",
+    desc:"A hidden loop of single-track dirt in the bluffs above Playa del Rey. Urban and entirely unexpected." },
+  { name:"Kenneth Hahn Park", latlng:[34.0022,-118.3558], radius:900, tag:"Singletrack · City View",
+    desc:"Winding single-track through a hillside park with panoramic city views. A real dirt escape inside the city grid." },
+  { // Centered on Ballona Creek channel, from mouth near Lincoln Blvd east toward Culver City
+    name:"Ballona Creek Path", latlng:[33.9795,-118.4390], radius:950, tag:"Bike Path · Urban",
+    desc:"A long, flat path following Ballona Creek from Marina del Rey east to Culver City. Great for a breezy out-and-back." },
+  { // North of the 10, along Olympic Blvd corridor, west of the 405
+    name:"Expo Bike Path", latlng:[34.0255,-118.4520], radius:1100, tag:"Bike Path · Commuter",
+    desc:"The backbone of West LA cycling — a protected path linking Santa Monica to Culver City along the Expo Line." },
+  { // Marvin Braude — tighter circle centered on the beach strand mid-point
+    name:"Marvin Braude Beach Path", latlng:[33.9880,-118.4710], radius:1600, tag:"Beach Path · Scenic",
+    desc:"The iconic beachfront strand from Marina del Rey north to Pacific Palisades. Flat, scenic, and always lively." },
+  { name:"Franklin Canyon", latlng:[34.1020,-118.4120], radius:1100, tag:"Gravel · Climbing",
+    desc:"Gravel roads and gentle climbing through a secluded urban canyon. Feels far from the city even though it isn't." },
+];
+
+// ─── Render markers ───────────────────────────────────────────
+shops.forEach(s => {
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="shop-dot"></div>`,
+    iconSize: [15,15], iconAnchor: [7,7],
+  });
+  L.marker(s.latlng, {icon}).addTo(map).on('click', function(e) {
+    L.DomEvent.stopPropagation(e);
+    const pt = map.latLngToContainerPoint(s.latlng);
+    showCard(pt.x, pt.y, 'Bike Shop', s.name, s.desc, s.url, s.urlLabel);
+  });
+});
+
+const starSVG = `<svg class="star-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+    fill="#c9a84c" stroke="white" stroke-width="1.2" stroke-linejoin="round"/>
+</svg>`;
+
+rides.forEach(r => {
+  const icon = L.divIcon({
+    className: '',
+    html: starSVG,
+    iconSize: [22,22], iconAnchor: [11,11],
+  });
+  L.marker(r.latlng, {icon}).addTo(map).on('click', function(e) {
+    L.DomEvent.stopPropagation(e);
+    const pt = map.latLngToContainerPoint(r.latlng);
+    showCard(pt.x, pt.y, `Group Ride · ${r.when}`, r.name, r.desc, r.url, r.urlLabel);
+  });
+});
+
+destinations.forEach(d => {
+  const circle = L.circle(d.latlng, {
+    radius: d.radius,
+    color:       'rgba(90,122,90,0.6)',
+    weight:      1.5,
+    dashArray:   '5 7',
+    fillColor:   '#8aac8a',
+    fillOpacity: 0.13,
+    interactive: true,
+  }).addTo(map);
+
+  circle.on('click', function(e) {
+    L.DomEvent.stopPropagation(e);
+    const pt = map.latLngToContainerPoint(e.latlng);
+    showCard(pt.x, pt.y, d.tag, d.name, d.desc, null, null);
+  });
+
+  // Non-interactive floating label
+  const labelIcon = L.divIcon({
+    className: '',
+    html: `<div style="font-family:'Amatic SC',cursive;font-weight:700;font-size:1rem;color:#3d5c3d;white-space:nowrap;text-shadow:0 0 8px rgba(245,240,232,1),0 0 12px rgba(245,240,232,1),0 1px 3px rgba(245,240,232,0.95);letter-spacing:0.04em;pointer-events:none;user-select:none;">${d.name}</div>`,
+    iconSize: [220,20], iconAnchor: [110,10],
+  });
+  L.marker(d.latlng, {icon: labelIcon, interactive: false}).addTo(map);
+});
+
+// Bare map click closes card
+map.on('click', () => { if (!suppressNext) hideCard(); });
+</script>
+</body>
+</html>
