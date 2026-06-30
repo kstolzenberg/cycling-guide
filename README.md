@@ -3,7 +3,8 @@ Friendly Guide to Cycling in West LA.
 
 A cheatsheet to favorite shops, rides and routes. [Click around](https://kstolzenberg.github.io/cycling-guide/) to explore.
 
-- Vibecoded with Claude Chat
+- Local insights collected from my own personal knowledge
+- Built custom interactive map with Claude Chat
 - Deployed on Github Pages 
 
 <img width="1000" height="auto" alt="screenshot" src="https://github.com/user-attachments/assets/e5c97d07-4c3f-45d0-bcbe-a7e4f06e8d7c" />
