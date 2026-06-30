@@ -1,15 +1,15 @@
 # Friendly Guide to Cycling in West LA
 A cheatsheet to favorite cycling shops, group rides and local routes.
 
-### Why:
-A collection of local insights based on my own personal knowledge; combining places, social groups and behaviors into a single view. 
-Existing apps (Maps, IG) only show a slice of this multidimensional information. AI enables more personalized, curated software.
+### Why
+A collection of local insights based on my own personal knowledge -- combining places, social groups and behaviors into a single view. 
+Existing apps (Maps, IG) only shows a slice of this multi-dimensional information. AI enables more personalized, curated software.
 
-### How: 
+### How
 - Styled and built a custom map with Claude Chat
 - Deployed on [Github Pages](https://kstolzenberg.github.io/cycling-guide/)
 
-### AI strugged with:
+### AI strugged with...
 - Finding a simple, self-contained interactive base map *(Open Street Map requires complicated dependencies, Claude found a good alternative CartoDB Voyager on its second attempt)*
 - Locating the markers on the map in their true spatial location *(Required multiple follow ups and GPS cross-references. Still not 100%)*
 - Sourcing the correct weblinks for shops and destinations *(Claude guessed for newer webpages that have less web history. Often a close but not quite accurate URL. Required manual correction.)*
