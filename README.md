@@ -3,7 +3,7 @@ A cheatsheet to favorite cycling shops, group rides and local routes.
 
 ### Why
 A collection of local insights based on my own personal knowledge -- combining places, social groups and behaviors into a single view. 
-Existing apps (Maps, IG) only shows a slice of this multi-dimensional information. AI enables more personalized, curated software.
+Existing apps (Maps, IG) only shows a siloed slice of this information. AI enables more personalized, curated software.
 
 ### How
 - Styled and built a custom map with Claude Chat
