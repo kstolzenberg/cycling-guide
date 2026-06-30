@@ -6,7 +6,10 @@ A collection of local insights based on my own personal knowledge -- combining p
 Existing apps (Maps, IG) only shows a siloed slice of this information. AI enables more personalized, curated software.
 
 ### How
-- Styled and built a custom map with Claude
+- I prompted with a list of local shops, rides and routes
+- I chose a font and loose visual language
+- Claude built a custom map with interactive popovers
+- Claude wrote all map copy
 - Deployed on [Github Pages](https://kstolzenberg.github.io/cycling-guide/)
 
 ### AI strugged with...
