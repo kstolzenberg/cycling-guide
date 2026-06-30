@@ -6,7 +6,7 @@ A collection of local insights based on my own personal knowledge -- combining p
 Existing apps (Maps, IG) only shows a siloed slice of this information. AI enables more personalized, curated software.
 
 ### How
-- Styled and built a custom map with Claude Chat
+- Styled and built a custom map with Claude
 - Deployed on [Github Pages](https://kstolzenberg.github.io/cycling-guide/)
 
 ### AI strugged with...
