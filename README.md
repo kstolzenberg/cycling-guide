@@ -7,7 +7,7 @@ Existing apps (Maps, IG) only shows a siloed slice of this information. AI enabl
 
 ### How
 - I prompted with a list of local shops, rides and routes
-- I chose a font and loose visual language
+- I prompted a font choice and loose visual language
 - Claude built a custom map with interactive popovers
 - Claude wrote all map copy
 - Deployed on [Github Pages](https://kstolzenberg.github.io/cycling-guide/)
