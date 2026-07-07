@@ -6,8 +6,8 @@ A collection of local insights based on my own personal knowledge -- combining p
 Existing apps (Maps, IG) only shows a siloed slice of this information. AI enables more personalized, curated software.
 
 ### How
-- I prompted with a list of local shops, rides and routes
-- I prompted a font choice and loose visual language
+- I defined a list of local shops, rides and routes
+- I defined a font choice and loose visual language
 - Claude built a custom map with interactive popovers
 - Claude wrote all map copy
 - Deployed on [Github Pages](https://kstolzenberg.github.io/cycling-guide/)
