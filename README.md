@@ -10,7 +10,7 @@ Existing apps (Maps, IG) only shows a siloed slice of this information. AI enabl
 - I defined a font choice and loose visual language
 - Claude built a custom map with interactive popovers
 - Claude wrote all map copy
-- Deployed on [Github Pages](https://kstolzenberg.github.io/cycling-guide/)
+- I deployed html output on [Github Pages](https://kstolzenberg.github.io/cycling-guide/)
 
 ### AI strugged with...
 - Finding a simple, self-contained interactive base map *(Open Street Map requires complicated dependencies, Claude found a good alternative CartoDB Voyager on its second attempt)*
