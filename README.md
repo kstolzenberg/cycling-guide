@@ -2,15 +2,15 @@
 A cheatsheet to favorite cycling shops, group rides and local routes.
 
 ### Why
-A collection of local insights based on my own personal knowledge -- combining places, social groups and behaviors into a single view. 
-Existing apps (Maps, IG) only shows a siloed slice of this information. AI enables more personalized, curated software.
+A collection of local insights based on my own personal knowledge; combining places, social knowledge, and ephemeral activity into a single tool. 
+Existing apps (Maps, IG, AllTrails) only shows a siloed slice of this multifaceted reality. Freed from platform limitations, AI can create more curated, nuanced, personal software.  
 
 ### How
 - I defined a list of local shops, rides and routes
 - I defined a font choice and loose visual language
 - Claude built a custom map with interactive popovers
 - Claude wrote all map copy
-- I deployed html output on [Github Pages](https://kstolzenberg.github.io/cycling-guide/)
+- I deployed the HTML output on [Github Pages](https://kstolzenberg.github.io/cycling-guide/)
 
 ### AI strugged with...
 - Finding a simple, self-contained interactive base map *(Open Street Map requires complicated dependencies, Claude found a good alternative CartoDB Voyager on its second attempt)*
